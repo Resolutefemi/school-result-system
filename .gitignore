@@ -45,6 +45,9 @@ cloudflare-env.d.ts
 # dev vars (contains local secrets)
 .dev.vars
 
+# wrangler state
+.wrangler/
+
 # InsForge & AI agent skills
 .insforge
 .agent
