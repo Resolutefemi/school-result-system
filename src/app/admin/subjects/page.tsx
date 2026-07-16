@@ -231,7 +231,7 @@ export default function AdminSubjectsPage() {
               </div>
               <div className="flex gap-3">
                 <button type="submit" className="btn-primary flex-1">Save</button>
-                <button type="button" onClick={() => { setShowEditForm(false); setEditingSubject(null); }} className="btn-secondary flex-1">Cancel</button>
+                <button type="button" onClick={() => { setShowEditForm(false); setEditingSubject(null); setName(''); setCode(''); }} className="btn-secondary flex-1">Cancel</button>
               </div>
             </form>
           </div>

@@ -292,7 +292,7 @@ export default function AdminClassesPage() {
             />
             <div className="flex gap-3">
               <button type="submit" className="btn-primary flex-1">Save</button>
-              <button type="button" onClick={() => { setShowEditForm(false); setEditingClass(null); }} className="btn-secondary flex-1">Cancel</button>
+              <button type="button" onClick={() => { setShowEditForm(false); setEditingClass(null); setNewClassName(''); }} className="btn-secondary flex-1">Cancel</button>
             </div>
           </form>
         </Modal>
