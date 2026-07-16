@@ -247,7 +247,7 @@ export default function HomePage() {
 }
 
 function FeatureCard({ icon, color, title, desc }: { icon: React.ReactNode; color: string; title: string; desc: string }) {
-  const colors: Record<string, string> = {
+  const colors: Record<string, { bg: string; text: string }> = {
     purple: { bg: 'bg-purple-100', text: 'text-purple-700' },
     green: { bg: 'bg-green-100', text: 'text-green-700' },
     blue: { bg: 'bg-blue-100', text: 'text-blue-700' },
