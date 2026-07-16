@@ -22,17 +22,16 @@ export interface SessionUser {
 export async function createSession(user: SessionUser) {
   const cookieStore = await cookies();
   const sessionData = JSON.stringify(user);
-  // Simple base64 encoding for session
   const sessionToken = Buffer.from(sessionData).toString('base64');
-  
+
   cookieStore.set(SESSION_COOKIE, sessionToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
-    maxAge: 60 * 60 * 24, // 24 hours
+    maxAge: 60 * 60 * 24,
     path: '/',
   });
-  
+
   cookieStore.set(SESSION_TYPE_COOKIE, user.type, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
@@ -48,9 +47,9 @@ export async function createSession(user: SessionUser) {
 export async function getSession(): Promise<SessionUser | null> {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get(SESSION_COOKIE)?.value;
-  
+
   if (!sessionToken) return null;
-  
+
   try {
     const sessionData = Buffer.from(sessionToken, 'base64').toString('utf-8');
     return JSON.parse(sessionData);
@@ -95,6 +94,7 @@ export async function loginAdmin(email: string, password: string): Promise<{ suc
 
 /**
  * Authenticate teacher login
+ * Checks if teacher is approved before allowing login
  */
 export async function loginTeacher(email: string, password: string): Promise<{ success: boolean; error?: string }> {
   try {
@@ -103,6 +103,11 @@ export async function loginTeacher(email: string, password: string): Promise<{ s
 
     const isValid = await bcrypt.compare(password, teacher.password);
     if (!isValid) return { success: false, error: 'Invalid email or password' };
+
+    // Check if teacher is approved
+    if (!teacher.approved) {
+      return { success: false, error: 'Your account is pending admin approval. Please try again later.' };
+    }
 
     await createSession({
       id: teacher.id,
@@ -123,7 +128,7 @@ export async function loginTeacher(email: string, password: string): Promise<{ s
  */
 export async function requireAuth(allowedTypes: ('admin' | 'teacher')[] = ['admin', 'teacher']): Promise<SessionUser> {
   const session = await getSession();
-  
+
   if (!session) {
     redirect('/login');
   }

@@ -7,6 +7,7 @@ interface DashboardData {
   classCount: number;
   subjectCount: number;
   teacherCount: number;
+  pendingTeacherCount: number;
   studentCount: number;
   resultCount: number;
   activeTerm: string | null;
@@ -122,6 +123,31 @@ export default function AdminDashboard() {
           </Link>
         ))}
       </div>
+
+      {/* Pending Approvals Alert */}
+      {data && data.pendingTeacherCount > 0 && (
+        <Link
+          href="/admin/teachers"
+          className="block bg-amber-50 border-2 border-amber-200 rounded-xl p-5 hover:bg-amber-100 transition-all group"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-3 h-3 bg-amber-500 rounded-full animate-pulse" />
+              <div>
+                <p className="font-bold text-amber-900">
+                  {data.pendingTeacherCount} Teacher{data.pendingTeacherCount > 1 ? 's' : ''} Pending Approval
+                </p>
+                <p className="text-sm text-amber-700">
+                  Click here to review and approve teacher registrations
+                </p>
+              </div>
+            </div>
+            <svg className="w-5 h-5 text-amber-600 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+        </Link>
+      )}
 
       {/* Quick Actions */}
       <div className="grid md:grid-cols-2 gap-6">

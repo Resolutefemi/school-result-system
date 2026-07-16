@@ -13,6 +13,7 @@ export async function GET() {
       classCount,
       subjectCount,
       teacherCount,
+      pendingTeacherCount,
       studentCount,
       resultCount,
       activeTerm,
@@ -20,7 +21,8 @@ export async function GET() {
     ] = await Promise.all([
       prisma.class.count({ where: { schoolId: session.schoolId } }),
       prisma.subject.count({ where: { schoolId: session.schoolId } }),
-      prisma.teacher.count({ where: { schoolId: session.schoolId } }),
+      prisma.teacher.count({ where: { schoolId: session.schoolId, approved: true } }),
+      prisma.teacher.count({ where: { schoolId: session.schoolId, approved: false } }),
       prisma.student.count({
         where: { class: { schoolId: session.schoolId } },
       }),
@@ -43,6 +45,7 @@ export async function GET() {
         classCount,
         subjectCount,
         teacherCount,
+        pendingTeacherCount,
         studentCount,
         resultCount,
         activeTerm: activeTerm ? `${activeTerm.name} ${activeTerm.year}` : null,
