@@ -1,0 +1,148 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model School {
+  id              String   @id @default(cuid())
+  name            String
+  address         String?
+  phone           String?
+  email           String?
+  logoUrl         String?
+  principalName   String?
+  principalSigUrl String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  admins    Admin[]
+  teachers  Teacher[]
+  classes   Class[]
+  subjects  Subject[]
+  terms     Term[]
+}
+
+model Admin {
+  id       String @id @default(cuid())
+  email    String @unique
+  password String
+  name     String
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+}
+
+model Teacher {
+  id         String   @id @default(cuid())
+  name       String
+  email      String   @unique
+  password   String
+  phone      String?
+  schoolId   String
+  school     School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  classSubjects ClassSubject[]
+}
+
+model Class {
+  id        String   @id @default(cuid())
+  name      String
+  schoolId  String
+  school    School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  students      Student[]
+  classSubjects ClassSubject[]
+}
+
+model Subject {
+  id        String   @id @default(cuid())
+  name      String
+  code      String?
+  schoolId  String
+  school    School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  classSubjects    ClassSubject[]
+  subjectScores    SubjectScore[]
+}
+
+model ClassSubject {
+  id        String @id @default(cuid())
+  classId   String
+  subjectId String
+  teacherId String?
+
+  class   Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  teacher Teacher? @relation(fields: [teacherId], references: [id], onDelete: SetNull)
+
+  @@unique([classId, subjectId])
+}
+
+model Term {
+  id        String  @id @default(cuid())
+  name      String
+  year      Int
+  isActive  Boolean @default(false)
+  schoolId  String
+  school    School  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  results Result[]
+}
+
+model Student {
+  id          String  @id @default(cuid())
+  firstName   String
+  lastName    String
+  admissionNo String  @unique
+  pin         String
+  classId     String
+  class       Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  results Result[]
+}
+
+model Result {
+  id               String   @id @default(cuid())
+  studentId        String
+  termId           String
+  totalScore       Int?
+  averageScore     Float?
+  position         Int?
+  teacherRemark    String?
+  teacherSignature String?
+  principalReport  String?
+  teacherReport    String?
+  isPublished      Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  term    Term    @relation(fields: [termId], references: [id], onDelete: Cascade)
+
+  subjectScores SubjectScore[]
+
+  @@unique([studentId, termId])
+}
+
+model SubjectScore {
+  id        String @id @default(cuid())
+  resultId  String
+  subjectId String
+  score     Int
+  grade     String?
+
+  result  Result  @relation(fields: [resultId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([resultId, subjectId])
+}
