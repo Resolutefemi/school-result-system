@@ -33,6 +33,8 @@ export default function AdminClassesPage() {
   const [teachers, setTeachers] = useState<TeacherData[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [editingClass, setEditingClass] = useState<ClassData | null>(null);
   const [newClassName, setNewClassName] = useState('');
   const [assignSubject, setAssignSubject] = useState<{ classId: string; subjectId: string } | null>(null);
   const [assignTeacher, setAssignTeacher] = useState<{ classSubjectId: string; teacherId: string } | null>(null);
@@ -83,6 +85,32 @@ export default function AdminClassesPage() {
       }
     } catch {
       alert('Failed to create class');
+    }
+  };
+
+  const handleEditClass = (cls: ClassData) => {
+    setEditingClass(cls);
+    setNewClassName(cls.name);
+    setShowEditForm(true);
+  };
+
+  const handleUpdateClass = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingClass) return;
+    try {
+      const res = await fetch(`/api/admin/classes/${editingClass.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newClassName }),
+      });
+      if (res.ok) {
+        setNewClassName('');
+        setEditingClass(null);
+        setShowEditForm(false);
+        fetchData();
+      }
+    } catch {
+      alert('Failed to update class');
     }
   };
 
@@ -160,12 +188,20 @@ export default function AdminClassesPage() {
                   <h3 className="text-lg font-bold text-gray-900">{cls.name}</h3>
                   <p className="text-sm text-gray-500">{cls._count.students} students</p>
                 </div>
-                <button
-                  onClick={() => handleDeleteClass(cls.id)}
-                  className="px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                >
-                  Delete
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleEditClass(cls)}
+                    className="px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteClass(cls.id)}
+                    className="px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -230,12 +266,33 @@ export default function AdminClassesPage() {
               value={newClassName}
               onChange={(e) => setNewClassName(e.target.value)}
               className="input-field"
-              placeholder="e.g., JSS 1A, SS 2B"
+              placeholder="e.g., JSS 1A, JSS 2B"
               required
             />
             <div className="flex gap-3">
               <button type="submit" className="btn-primary flex-1">Create</button>
               <button type="button" onClick={() => setShowCreateForm(false)} className="btn-secondary flex-1">Cancel</button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {/* Edit Class Modal */}
+      {showEditForm && editingClass && (
+        <Modal onClose={() => { setShowEditForm(false); setEditingClass(null); }}>
+          <h3 className="text-lg font-bold mb-4">Edit Class</h3>
+          <form onSubmit={handleUpdateClass} className="space-y-4">
+            <input
+              type="text"
+              value={newClassName}
+              onChange={(e) => setNewClassName(e.target.value)}
+              className="input-field"
+              placeholder="e.g., JSS 1A"
+              required
+            />
+            <div className="flex gap-3">
+              <button type="submit" className="btn-primary flex-1">Save</button>
+              <button type="button" onClick={() => { setShowEditForm(false); setEditingClass(null); }} className="btn-secondary flex-1">Cancel</button>
             </div>
           </form>
         </Modal>

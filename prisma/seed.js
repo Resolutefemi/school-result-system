@@ -76,14 +76,11 @@ async function main() {
   }
   console.log(`Created ${defaultSubjects.length} default subjects`);
 
-  // Create Classes
+  // Create Classes (JSS only, no SSS)
   const classNames = [
     'JSS 1A', 'JSS 1B', 'JSS 1C',
     'JSS 2A', 'JSS 2B', 'JSS 2C',
     'JSS 3A', 'JSS 3B', 'JSS 3C',
-    'SS 1A', 'SS 1B', 'SS 1C',
-    'SS 2A', 'SS 2B', 'SS 2C',
-    'SS 3A', 'SS 3B', 'SS 3C',
   ];
 
   for (const name of classNames) {
@@ -97,7 +94,7 @@ async function main() {
       },
     });
   }
-  console.log(`Created ${classNames.length} classes`);
+  console.log(`Created ${classNames.length} JSS classes`);
 
   // Create Sample Teacher
   const teacherPassword = await bcrypt.hash('teacher123', 12);

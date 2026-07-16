@@ -12,6 +12,8 @@ export default function AdminSubjectsPage() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [editingSubject, setEditingSubject] = useState<Subject | null>(null);
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
 
@@ -59,6 +61,34 @@ export default function AdminSubjectsPage() {
       }
     } catch {
       alert('Failed to create subject');
+    }
+  };
+
+  const handleEditSubject = (subject: Subject) => {
+    setEditingSubject(subject);
+    setName(subject.name);
+    setCode(subject.code || '');
+    setShowEditForm(true);
+  };
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingSubject) return;
+    try {
+      const res = await fetch(`/api/admin/subjects/${editingSubject.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, code }),
+      });
+      if (res.ok) {
+        setName('');
+        setCode('');
+        setEditingSubject(null);
+        setShowEditForm(false);
+        fetchSubjects();
+      }
+    } catch {
+      alert('Failed to update subject');
     }
   };
 
@@ -129,14 +159,24 @@ export default function AdminSubjectsPage() {
                   <span className="text-xs text-gray-400">{subject.code}</span>
                 )}
               </div>
-              <button
-                onClick={() => handleDelete(subject.id)}
-                className="opacity-0 group-hover:opacity-100 p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-all"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-              </button>
+              <div className="flex gap-1">
+                <button
+                  onClick={() => handleEditSubject(subject)}
+                  className="opacity-0 group-hover:opacity-100 p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => handleDelete(subject.id)}
+                  className="opacity-0 group-hover:opacity-100 p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         ))}
@@ -169,6 +209,29 @@ export default function AdminSubjectsPage() {
               <div className="flex gap-3">
                 <button type="submit" className="btn-primary flex-1">Create</button>
                 <button type="button" onClick={() => setShowForm(false)} className="btn-secondary flex-1">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Subject Modal */}
+      {showEditForm && editingSubject && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <h3 className="text-lg font-bold mb-4">Edit Subject</h3>
+            <form onSubmit={handleUpdate} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Subject Name</label>
+                <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="input-field" required />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Subject Code (optional)</label>
+                <input type="text" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} className="input-field" />
+              </div>
+              <div className="flex gap-3">
+                <button type="submit" className="btn-primary flex-1">Save</button>
+                <button type="button" onClick={() => { setShowEditForm(false); setEditingSubject(null); }} className="btn-secondary flex-1">Cancel</button>
               </div>
             </form>
           </div>
